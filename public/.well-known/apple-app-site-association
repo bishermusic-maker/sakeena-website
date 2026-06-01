@@ -1,0 +1,15 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["QL6FYC6LS6.com.sakeena.app"],
+        "components": [
+          {
+            "/": "/accept-invite*",
+            "comment": "Partner invite deep link"
+          }
+        ]
+      }
+    ]
+  }
+}
