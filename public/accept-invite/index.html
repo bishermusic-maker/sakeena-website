@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>You're invited to Sakeena</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0a150a;
+      color: #f1f5f0;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .card {
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+    }
+    .emoji { font-size: 56px; margin-bottom: 24px; }
+    h1 {
+      font-size: 26px;
+      font-weight: 700;
+      color: #f1f5f0;
+      margin-bottom: 12px;
+    }
+    .inviter {
+      color: #a78bfa;
+    }
+    p {
+      color: #5a875a;
+      font-size: 15px;
+      line-height: 1.7;
+      margin-bottom: 32px;
+    }
+    .btn-primary {
+      display: block;
+      background: #456845;
+      color: #f1f5f0;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 16px;
+      padding: 16px 32px;
+      border-radius: 16px;
+      margin-bottom: 12px;
+      transition: opacity 0.2s;
+    }
+    .btn-primary:active { opacity: 0.8; }
+    .btn-secondary {
+      display: block;
+      color: #7da37d;
+      text-decoration: none;
+      font-size: 14px;
+      padding: 12px;
+    }
+    .divider {
+      color: #2e432e;
+      font-size: 12px;
+      margin: 8px 0 20px;
+    }
+    .brand {
+      color: #2e432e;
+      font-size: 13px;
+      margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="emoji">👫</div>
+    <h1 id="title">You've been invited</h1>
+    <p id="subtitle">Open the Sakeena app to accept the invitation and start reflecting together.</p>
+
+    <!-- Primary: open app if installed -->
+    <a id="open-app" href="#" class="btn-primary">Open in Sakeena</a>
+
+    <div class="divider">Don't have the app yet?</div>
+
+    <!-- Download link — replace TESTFLIGHT_URL with real link when available -->
+    <a id="download-btn" href="TESTFLIGHT_URL" class="btn-primary" style="background:#1e301e; color:#7da37d;">
+      Download Sakeena
+    </a>
+
+    <a href="mailto:hello@getsakeena.com" class="btn-secondary">Need help? Contact us</a>
+
+    <p class="brand">سكينة · Sakeena</p>
+  </div>
+
+  <script>
+    // Read token + inviter from URL
+    const params = new URLSearchParams(window.location.search);
+    const token   = params.get("token")   || "";
+    const inviter = params.get("inviter") || "";
+    const name    = params.get("name")    || "";
+
+    // Update UI with inviter name if present
+    if (name) {
+      document.getElementById("title").innerHTML =
+        `<span class="inviter">${name}</span> invited you`;
+    }
+
+    // Build deep link
+    const deepLink = `sakeena://accept-invite?token=${token}&inviter=${inviter}`;
+    document.getElementById("open-app").href = deepLink;
+
+    // Try to open app automatically on page load
+    // If app is installed (Universal Links would have already opened it),
+    // this is a fallback for the custom scheme
+    setTimeout(() => {
+      window.location.href = deepLink;
+    }, 800);
+  </script>
+</body>
+</html>
