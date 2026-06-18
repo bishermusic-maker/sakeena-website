@@ -16,5 +16,17 @@
     <h1>سكينة · Sakeena</h1>
     <p>Coming soon.</p>
   </div>
+  <script>
+    const hash = window.location.hash;
+    if (hash) {
+      const params = new URLSearchParams(hash.substring(1));
+      const type = params.get('type');
+      if (type === 'recovery') {
+        window.location.href = 'sakeena://reset-password' + hash;
+      } else if (type === 'signup') {
+        window.location.href = 'sakeena://confirm-email' + hash;
+      }
+    }
+  </script>
 </body>
 </html>
