@@ -23,7 +23,8 @@
       const type = params.get('type');
       const query = hash.substring(1);
       if (type === 'recovery') {
-        window.location.href = 'sakeena://reset-password?' + query;
+        // Redirect to web-based reset page (keeps hash so the page can read tokens)
+        window.location.href = '/reset-password' + hash;
       } else if (type === 'signup') {
         window.location.href = 'sakeena://confirm-email?' + query;
       }

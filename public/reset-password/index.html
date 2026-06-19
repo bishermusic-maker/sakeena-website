@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Reset Password — Sakeena</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0a150a; color: #f1f5f0;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh; display: flex; align-items: center;
+      justify-content: center; padding: 24px;
+    }
+    .card { max-width: 400px; width: 100%; }
+    h1 { color: #a78bfa; font-size: 28px; margin-bottom: 6px; }
+    .tagline { color: #5a875a; font-size: 14px; margin-bottom: 32px; }
+    h2 { color: #f1f5f0; font-size: 20px; margin-bottom: 8px; }
+    p { color: #7da37d; font-size: 14px; line-height: 1.6; margin-bottom: 24px; }
+    label { display: block; color: #7da37d; font-size: 13px; margin-bottom: 6px; }
+    input {
+      width: 100%; padding: 14px 16px; background: #1a2e1a;
+      border: 1px solid #2e432e; border-radius: 12px;
+      color: #f1f5f0; font-size: 16px; margin-bottom: 16px;
+      outline: none; -webkit-appearance: none;
+    }
+    input:focus { border-color: #456845; }
+    button {
+      width: 100%; padding: 16px; background: #456845;
+      color: #f1f5f0; border: none; border-radius: 16px;
+      font-size: 16px; font-weight: 600; cursor: pointer;
+      margin-top: 8px;
+    }
+    button:disabled { opacity: 0.5; cursor: default; }
+    .error { color: #f87171; font-size: 14px; margin-top: 12px; }
+    .success { text-align: center; padding: 32px 0; }
+    .success .icon { font-size: 56px; margin-bottom: 16px; }
+    .success h2 { margin-bottom: 12px; }
+    .open-btn {
+      display: block; background: #456845; color: #f1f5f0;
+      text-decoration: none; text-align: center; padding: 16px;
+      border-radius: 16px; font-weight: 600; font-size: 16px;
+      margin-top: 24px;
+    }
+    #loading { text-align: center; color: #5a875a; padding: 32px 0; }
+    #expired { text-align: center; padding: 32px 0; }
+    #expired h2 { color: #f87171; margin-bottom: 12px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Sakeena</h1>
+    <p class="tagline">The quiet space for the parent you're becoming</p>
+
+    <div id="loading"><p>Setting up...</p></div>
+    <div id="form-section" style="display:none">
+      <h2>Choose a new password</h2>
+      <p>Enter a new password for your Sakeena account.</p>
+      <label for="password">New password</label>
+      <input type="password" id="password" placeholder="••••••••" autocomplete="new-password" />
+      <label for="confirm">Confirm password</label>
+      <input type="password" id="confirm" placeholder="••••••••" autocomplete="new-password" />
+      <button id="submit-btn" onclick="resetPassword()">Update password</button>
+      <p class="error" id="error-msg" style="display:none"></p>
+    </div>
+    <div id="success-section" style="display:none" class="success">
+      <div class="icon">✅</div>
+      <h2>Password updated!</h2>
+      <p>Your password has been changed. Open Sakeena to sign in.</p>
+      <a href="sakeena://" class="open-btn">Open Sakeena</a>
+    </div>
+    <div id="expired" style="display:none">
+      <h2>Link expired</h2>
+      <p>This password reset link has expired. Please request a new one from the app.</p>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script>
+    const SUPABASE_URL = 'https://hxfezhwodlaizqhrcdwz.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh4ZmV6aHdvZGxhaXpxaHJjZHd6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYzNjg5NTgsImV4cCI6MjA5MTk0NDk1OH0.JbugIk4CHWyMDCNYVath2GK22zW-sTePOIxpvkXU-b8';
+    const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    async function init() {
+      const hash = window.location.hash.substring(1);
+      const params = new URLSearchParams(hash);
+      const accessToken = params.get('access_token');
+      const refreshToken = params.get('refresh_token');
+      const type = params.get('type');
+
+      if (!accessToken || !refreshToken || type !== 'recovery') {
+        show('expired');
+        return;
+      }
+
+      const { error } = await client.auth.setSession({
+        access_token: accessToken,
+        refresh_token: refreshToken,
+      });
+
+      if (error) {
+        show('expired');
+        return;
+      }
+
+      show('form-section');
+    }
+
+    async function resetPassword() {
+      const password = document.getElementById('password').value;
+      const confirm = document.getElementById('confirm').value;
+      const errorEl = document.getElementById('error-msg');
+      const btn = document.getElementById('submit-btn');
+
+      errorEl.style.display = 'none';
+
+      if (!password || password.length < 6) {
+        errorEl.textContent = 'Password must be at least 6 characters.';
+        errorEl.style.display = 'block';
+        return;
+      }
+      if (password !== confirm) {
+        errorEl.textContent = "Passwords don't match.";
+        errorEl.style.display = 'block';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Updating...';
+
+      const { error } = await client.auth.updateUser({ password });
+      if (error) {
+        errorEl.textContent = error.message;
+        errorEl.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'Update password';
+        return;
+      }
+
+      show('success-section');
+    }
+
+    function show(id) {
+      ['loading', 'form-section', 'success-section', 'expired'].forEach(s => {
+        document.getElementById(s).style.display = s === id ? 'block' : 'none';
+      });
+    }
+
+    init();
+  </script>
+</body>
+</html>
