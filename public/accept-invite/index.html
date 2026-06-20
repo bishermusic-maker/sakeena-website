@@ -93,9 +93,7 @@
   <script>
     // Read token + inviter from URL
     const params = new URLSearchParams(window.location.search);
-    const token   = params.get("token")   || "";
-    const inviter = params.get("inviter") || "";
-    const name    = params.get("name")    || "";
+    const name = params.get("name") || "";
 
     // Update UI with inviter name if present
     if (name) {
@@ -103,16 +101,15 @@
         `<span class="inviter">${name}</span> invited you`;
     }
 
-    // Build deep link
-    const deepLink = `sakeena://accept-invite?token=${token}&inviter=${inviter}`;
-    document.getElementById("open-app").href = deepLink;
+    // "Open in Sakeena" uses this page's own HTTPS URL as a Universal Link.
+    // iOS intercepts https://getsakeena.com/accept-invite?... and opens the app
+    // directly when the app is installed — no sakeena:// custom scheme needed.
+    // This also avoids the "Safari cannot open" error when the app is not installed.
+    document.getElementById("open-app").href = window.location.href;
 
-    // Try to open app automatically on page load
-    // If app is installed (Universal Links would have already opened it),
-    // this is a fallback for the custom scheme
-    setTimeout(() => {
-      window.location.href = deepLink;
-    }, 800);
+    // No auto-redirect: Universal Links only fire on user tap, not JS navigation.
+    // When the app is not installed the user stays on this page and sees the
+    // "Download Sakeena" button below.
   </script>
 </body>
 </html>
